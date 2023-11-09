@@ -36,12 +36,6 @@ class _TodoAppState extends State<TodoApp> {
   List<Todo> _todos = [];
   int _count = 0;
 
-  @override
-  void initState() {
-    refreshItemList();
-    super.initState();
-  }
-
   void refreshItemList() async {
     final todos = await dbHelper.getAllTodos();
     setState(() {
@@ -73,7 +67,7 @@ class _TodoAppState extends State<TodoApp> {
       id: todo.id,
       title: todo.title,
       description: todo.description,
-      completed: completed,
+      completed: todo.completed,
     );
     await dbHelper.updateTodo(item);
     refreshItemList();
@@ -82,6 +76,12 @@ class _TodoAppState extends State<TodoApp> {
   void deleteItem(int id) async {
     await dbHelper.deleteTodo(id);
     refreshItemList();
+  }
+
+  @override
+  void initState() {
+    refreshItemList();
+    super.initState();
   }
 
   @override
@@ -127,11 +127,64 @@ class _TodoAppState extends State<TodoApp> {
                         ),
                   title: Text(todo.title),
                   subtitle: Text(todo.description),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      deleteItem(todo.id);
-                    },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Edit Todo'),
+                              content: SizedBox(
+                                width: 200,
+                                height: 200,
+                                child: Column(
+                                  children: [
+                                    TextField(
+                                      controller: _titleController,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Judul todo'),
+                                    ),
+                                    TextField(
+                                      controller: _descController,
+                                      decoration: const InputDecoration(
+                                          hintText: 'Deskripsi todo'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: const Text('Batalkan'),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                                TextButton(
+                                  child: const Text('Update'),
+                                  onPressed: () {
+                                    updateItem(
+                                        Todo(
+                                            id: todo.id,
+                                            title: _titleController.text,
+                                            description: _descController.text,
+                                            completed: todo.completed),
+                                        !todo.completed);
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          deleteItem(todo.id);
+                        },
+                      ),
+                    ],
                   ),
                 );
               },

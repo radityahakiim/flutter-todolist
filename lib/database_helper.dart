@@ -21,9 +21,9 @@ class DatabaseHelper {
   DatabaseHelper.internal();
 
   Future<Database> initDb() async {
-    io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    io.Directory directory = await getApplicationDocumentsDirectory();
     String path = join(
-      documentsDirectory.path,
+      directory.path,
       'todolist.db',
     );
     var theDb = await openDatabase(
